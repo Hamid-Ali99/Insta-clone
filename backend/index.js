@@ -2,7 +2,9 @@ import express from "express";
 import cors from "cors";
 import dotenv from "dotenv";
 import cookieParser from "cookie-parser";
+
 import connectDB from "./utils/db.js";
+import userRouter from "./routes/user.route.js";
 
 dotenv.config();
 
@@ -22,12 +24,15 @@ app.use(cors(corsOptions));
 
 app.use(cookieParser());
 
-app.get("/", (req, res) => {
-  res.status(200).json({
-    message: "Am comming from backend",
-    success: true,
-  });
-});
+// our apis
+app.use("/api/v1/user", userRouter);
+
+// app.get("/", (req, res) => {
+//   res.status(200).json({
+//     message: "Am comming from backend",
+//     success: true,
+//   });
+// });
 
 app.listen(PORT, () => {
   connectDB();
