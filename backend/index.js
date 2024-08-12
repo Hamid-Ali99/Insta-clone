@@ -5,6 +5,7 @@ import cookieParser from "cookie-parser";
 
 import connectDB from "./utils/db.js";
 import userRouter from "./routes/user.route.js";
+import postRouter from "./routes/post.route.js";
 
 dotenv.config();
 
@@ -26,6 +27,7 @@ app.use(cookieParser());
 
 // our apis
 app.use("/api/v1/user", userRouter);
+app.use("/api/v1/post", postRouter);
 
 // app.get("/", (req, res) => {
 //   res.status(200).json({
