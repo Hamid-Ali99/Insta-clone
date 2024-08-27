@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Dialog, DialogContent, DialogTrigger } from "./ui/dialog";
 import { Link } from "react-router-dom";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
@@ -6,9 +6,25 @@ import { MoreHorizontal } from "lucide-react";
 import { Button } from "./ui/button";
 import { DialogTitle } from "@radix-ui/react-dialog";
 import * as VisuallyHidden from "@radix-ui/react-visually-hidden";
+import { useDispatch, useSelector } from "react-redux";
+import { toast } from "sonner";
+import axios from "axios";
+
+import Comment from "./Comment";
+import { SERVER_API } from "@/lib/utils";
+import { setPosts } from "@/redux/postSlice";
 
 const CommentDialog = ({ openCommentModel, setOpenCommentModel }) => {
+  const dispatch = useDispatch();
   const [text, setText] = useState("");
+  const { selectedPost, posts } = useSelector((state) => state.post);
+  const [comment, setComment] = useState([]);
+
+  useEffect(() => {
+    if (selectedPost) {
+      setComment(selectedPost.comments);
+    }
+  }, [selectedPost]);
 
   const changeEventHandler = (e) => {
     const inputText = e.target.value;
@@ -19,8 +35,31 @@ const CommentDialog = ({ openCommentModel, setOpenCommentModel }) => {
     }
   };
 
-  const sendMessageHandler = async () => {
-    alert(`Sending comment: ${text}`);
+  const commentHandler = async () => {
+    try {
+      const res = await axios.post(
+        `${SERVER_API}/post/${selectedPost._id}/comment`,
+        { text },
+        {
+          headers: { "Content-Type": "application/json" },
+          withCredentials: true,
+        }
+      );
+
+      if (res.data.success) {
+        const updatedComments = [...comment, res.data.comment];
+        setComment(updatedComments);
+
+        const updatedPostData = posts.map((p) =>
+          p._id === selectedPost._id ? { ...p, comments: updatedComments } : p
+        );
+        dispatch(setPosts(updatedPostData));
+        toast.success(res.data.message);
+        setText("");
+      }
+    } catch (error) {
+      toast.error(error.response.data.message);
+    }
   };
 
   return (
@@ -36,7 +75,7 @@ const CommentDialog = ({ openCommentModel, setOpenCommentModel }) => {
         <div className="flex flex-1">
           <div className="w-1/2">
             <img
-              src={"https://pixlr.com/images/index/ai-image-generator-one.webp"}
+              src={selectedPost?.image}
               alt="post_img"
               className="w-full h-full object-cover rounded-l-lg"
             />
@@ -46,12 +85,14 @@ const CommentDialog = ({ openCommentModel, setOpenCommentModel }) => {
               <div className="flex gap-3 items-center">
                 <Link>
                   <Avatar>
-                    <AvatarImage src={"/profile.png"} />
+                    <AvatarImage src={selectedPost?.author?.profilePicture} />
                     <AvatarFallback>CN</AvatarFallback>
                   </Avatar>
                 </Link>
                 <div>
-                  <Link className="font-semibold text-xs">username</Link>
+                  <Link className="font-semibold text-xs">
+                    {selectedPost?.author?.username}
+                  </Link>
                   {/* <span className='text-gray-600 text-sm'>Bio here...</span> */}
                 </div>
               </div>
@@ -75,7 +116,11 @@ const CommentDialog = ({ openCommentModel, setOpenCommentModel }) => {
               </Dialog>
             </div>
             <hr />
-            <div className="flex-1 overflow-y-auto max-h-96 p-4">comment</div>
+            <div className="flex-1 overflow-y-auto max-h-96 p-4">
+              {comment.map((comment) => (
+                <Comment key={comment._id} comment={comment} />
+              ))}
+            </div>
             <div className="p-4">
               <div className="flex items-center gap-2">
                 <input
@@ -87,7 +132,7 @@ const CommentDialog = ({ openCommentModel, setOpenCommentModel }) => {
                 />
                 <Button
                   disabled={!text.trim()}
-                  onClick={sendMessageHandler}
+                  onClick={commentHandler}
                   variant="outline"
                 >
                   Send

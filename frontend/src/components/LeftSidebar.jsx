@@ -9,12 +9,21 @@ import {
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import axios from "axios";
-import { SERVER_API } from "@/lib/utils";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { useState } from "react";
+
+import { SERVER_API } from "@/lib/utils";
+import { setAuthUser } from "@/redux/authSlice";
+import CreatePost from "./CreatePost";
+import { setPosts, setSelectedPost } from "@/redux/postSlice";
 
 const LeftSidebar = () => {
   const navigate = useNavigate();
+  const { user } = useSelector((state) => state.auth);
+  const dispatch = useDispatch();
+  const [openCreatePostmodal, setOpenCreatePostmodal] = useState(false);
 
   const sidebarItems = [
     { icon: <Home />, text: "Home" },
@@ -26,7 +35,10 @@ const LeftSidebar = () => {
     {
       icon: (
         <Avatar className="w-6 h-6">
-          <AvatarImage src={"/profile.png"} alt="profile" />
+          <AvatarImage
+            src={user?.profilePicture || "/profile.png"}
+            alt="profile"
+          />
           <AvatarFallback>CN</AvatarFallback>
         </Avatar>
       ),
@@ -42,6 +54,9 @@ const LeftSidebar = () => {
       });
 
       if (res.data.success) {
+        dispatch(setAuthUser(null));
+        dispatch(setSelectedPost(null));
+        dispatch(setPosts([]));
         navigate("/login");
         toast.success(res.data.message);
       }
@@ -53,6 +68,7 @@ const LeftSidebar = () => {
 
   const handleClick = (textType) => {
     if (textType === "Logout") logoutHandler(textType);
+    else if (textType === "Create") setOpenCreatePostmodal(true);
   };
 
   return (
@@ -65,7 +81,7 @@ const LeftSidebar = () => {
               <div
                 onClick={() => handleClick(item.text)}
                 key={index}
-                className="className='flex items-center gap-3 relative hover:bg-gray-100 cursor-pointer rounded-lg p-3 my-3'"
+                className="flex items-center gap-3 relative hover:bg-gray-100 cursor-pointer rounded-lg p-3 my-3"
               >
                 {item.icon}
                 <span>{item.text}</span>
@@ -74,6 +90,10 @@ const LeftSidebar = () => {
           })}
         </div>
       </div>
+      <CreatePost
+        openCreatePostmodal={openCreatePostmodal}
+        setOpenCreatePostmodal={setOpenCreatePostmodal}
+      />
     </div>
   );
 };
