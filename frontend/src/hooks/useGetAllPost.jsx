@@ -16,7 +16,7 @@ const useGetAllPost = () => {
         });
         if (res.data.success) {
           dispatch(setPosts(res.data.posts));
-          console.log(res.data.posts);
+          // console.log(res.data.posts);
         }
       } catch (error) {
         toast.error(error.response.data.message);

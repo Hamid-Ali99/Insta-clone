@@ -69,6 +69,9 @@ const LeftSidebar = () => {
   const handleClick = (textType) => {
     if (textType === "Logout") logoutHandler(textType);
     else if (textType === "Create") setOpenCreatePostmodal(true);
+    else if (textType === "Profile") navigate(`/profile/${user._id}`);
+    else if (textType === "Home") navigate("/");
+    else if (textType === "Messages") navigate("/chat");
   };
 
   return (
