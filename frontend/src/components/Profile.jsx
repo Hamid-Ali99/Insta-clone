@@ -1,5 +1,5 @@
 import { Link, useParams } from "react-router-dom";
-import useGetUserProfile from "./useGetUserProfile";
+import useGetUserProfile from "../hooks/useGetUserProfile";
 import { useSelector } from "react-redux";
 import { useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
@@ -84,19 +84,19 @@ const Profile = () => {
               <div className="flex items-center gap-4">
                 <p>
                   <span className="font-semibold">
-                    {userProfile?.posts.length}{" "}
+                    {userProfile?.posts?.length}{" "}
                   </span>
                   posts
                 </p>
                 <p>
                   <span className="font-semibold">
-                    {userProfile?.followers.length}{" "}
+                    {userProfile?.followers?.length}{" "}
                   </span>
                   followers
                 </p>
                 <p>
                   <span className="font-semibold">
-                    {userProfile?.following.length}{" "}
+                    {userProfile?.following?.length}{" "}
                   </span>
                   following
                 </p>

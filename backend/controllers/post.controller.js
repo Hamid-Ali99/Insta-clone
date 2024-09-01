@@ -67,7 +67,7 @@ export const getAllPost = async (_, res) => {
         populate: { path: "author", select: "username profilePicture" },
       });
 
-    return res.status(201).json({
+    return res.status(200).json({
       posts,
       success: true,
     });

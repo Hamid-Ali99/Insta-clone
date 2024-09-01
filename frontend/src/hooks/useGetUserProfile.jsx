@@ -13,13 +13,17 @@ const useGetUserProfile = (userId) => {
           withCredentials: true,
         });
         if (res.data.success) {
+          // const sortedPosts = res.data.user.posts.sort(
+          //   (a, b) => b.createdAt - a.createdAt
+          // );
           dispatch(setUserProfile(res.data.user));
+          console.log(res.data.user);
         }
       } catch (error) {
         console.log(error);
       }
     };
     fetchUserProfile();
-  }, [userId]);
+  }, [userId, dispatch]);
 };
 export default useGetUserProfile;

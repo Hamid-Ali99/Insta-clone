@@ -15,14 +15,16 @@ const useGetAllPost = () => {
           withCredentials: true,
         });
         if (res.data.success) {
-          dispatch(setPosts(res.data.posts));
-          // console.log(res.data.posts);
+          const sortedPosts = res.data.posts.sort(
+            (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+          );
+          dispatch(setPosts(sortedPosts));
         }
       } catch (error) {
         toast.error(error.response.data.message);
       }
     };
     fetchAllPosts();
-  }, []);
+  }, [dispatch]);
 };
 export default useGetAllPost;
