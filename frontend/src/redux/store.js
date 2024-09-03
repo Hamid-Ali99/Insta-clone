@@ -1,5 +1,8 @@
 import { combineReducers, configureStore } from "@reduxjs/toolkit";
-import authSlice from "./authSlice";
+import authSlice from "./authSlice.js";
+import postSlice from "./postSlice.js";
+import socketSlice from "./socketSlice.js";
+import chatSlice from "./chatSlice.js";
 import {
   persistReducer,
   FLUSH,
@@ -10,7 +13,6 @@ import {
   REGISTER,
 } from "redux-persist";
 import storage from "redux-persist/lib/storage";
-import postSlice from "./postSlice";
 
 const persistConfig = {
   key: "root",
@@ -21,6 +23,8 @@ const persistConfig = {
 const rootReducer = combineReducers({
   auth: authSlice,
   post: postSlice,
+  socketio: socketSlice,
+  chat: chatSlice,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
@@ -30,7 +34,18 @@ const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+        // Disable the serializable check for all actions involving the socketio slice
+        ignoredActions: [
+          FLUSH,
+          REHYDRATE,
+          PAUSE,
+          PERSIST,
+          PURGE,
+          REGISTER,
+          "socketio/setSocket",
+        ],
+        // Disable checks for the socket in the state
+        ignoredPaths: ["socketio.socket"],
       },
     }),
 });
