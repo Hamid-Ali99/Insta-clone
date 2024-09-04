@@ -4,17 +4,45 @@ import { AvatarImage } from "@radix-ui/react-avatar";
 import { setSelectedUser } from "@/redux/authSlice";
 import { MessageCircleCode } from "lucide-react";
 import Messages from "./Messages";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
+import axios from "axios";
+import { SERVER_API } from "@/lib/utils";
+import { setMessages } from "@/redux/chatSlice";
 
 const ChatPage = () => {
+  const [textMessage, setTextMessage] = useState("");
   const { suggestedUsers, selectedUser, user } = useSelector(
     (state) => state.auth
   );
+  const { onlineUsers, messages } = useSelector((state) => state.chat);
+  console.log("onlineUsers", onlineUsers);
+
   //   console.log("Seleted", selectedUser);
 
   const dispatch = useDispatch();
+
+  const sendMessageHandler = async (receiverId) => {
+    try {
+      const res = await axios.post(
+        `${SERVER_API}/message/send/${receiverId}`,
+        { textMessage },
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+          withCredentials: true,
+        }
+      );
+      if (res.data.success) {
+        dispatch(setMessages([...messages, res.data.newMessage]));
+        setTextMessage("");
+      }
+    } catch (error) {
+      console.log("Error in sendMessageHandler", error);
+    }
+  };
 
   // if user leaves the chat, reset selectedUser
   useEffect(() => {
@@ -29,7 +57,7 @@ const ChatPage = () => {
         <hr className="mb-4 border-gray-300" />
         <div className="overflow-y-auto h-[80vh]">
           {suggestedUsers.map((suggestedUser) => {
-            const isOnline = true;
+            const isOnline = onlineUsers.includes(suggestedUser._id);
 
             return (
               <div
@@ -69,13 +97,18 @@ const ChatPage = () => {
             </div>
           </div>
           <Messages selectedUser={selectedUser} />
-          <div className="flex items-center p-4 border-t border-t-gray-300"></div>
-          <Input
-            type="text"
-            className="flex-1 mr-2 focus-visible:ring-transparent"
-            placeholder="Messages..."
-          />
-          <Button>send</Button>
+          <div className="flex items-center p-4 border-t border-t-gray-300">
+            <Input
+              type="text"
+              className="flex-1 mr-2 focus-visible:ring-transparent"
+              placeholder="Messages..."
+              value={textMessage}
+              onChange={(e) => setTextMessage(e.target.value)}
+            />
+            <Button onClick={() => sendMessageHandler(selectedUser._id)}>
+              send
+            </Button>
+          </div>
         </section>
       ) : (
         <div className="flex flex-col items-center justify-center mx-auto">
