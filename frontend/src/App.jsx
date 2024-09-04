@@ -13,6 +13,7 @@ import EditProfile from "./components/EditProfile";
 import ChatPage from "./components/ChatPage";
 import { setSocket } from "./redux/socketSlice";
 import { setOnlineUsers } from "./redux/chatSlice";
+import { setLikeNotification } from "./redux/rtnSlice";
 
 const browserRouter = createBrowserRouter([
   {
@@ -70,6 +71,10 @@ function App() {
       // listen all the events
       socketio.on("getOnlineUsers", (onlineUsers) => {
         dispatch(setOnlineUsers(onlineUsers));
+      });
+
+      socketio.on("notification", (notification) => {
+        dispatch(setLikeNotification(notification));
       });
 
       return () => {

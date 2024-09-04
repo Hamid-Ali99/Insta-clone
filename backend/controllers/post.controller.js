@@ -4,7 +4,7 @@ import { User } from "../models/user.model.js";
 import { Post } from "../models/post.model.js";
 import { Comment } from "../models/comment.model.js";
 import cloudinary from "../utils/cloudinary.js";
-import getDataUri from "../utils/datauri.js";
+import { getReceiverSocketId, io } from "../socket/socket.js";
 
 export const addNewPost = async (req, res) => {
   try {
@@ -113,6 +113,25 @@ export const likePost = async (req, res) => {
     await post.save();
 
     // implement socket io for real time notification
+    const user = await User.findById(likeKarneWaleUserKiId).select(
+      "username profilePicture"
+    );
+
+    const postOwnerId = await post.author.toString();
+
+    if (postOwnerId !== likeKarneWaleUserKiId) {
+      // emit notification event
+      const notification = {
+        type: "like",
+        userId: likeKarneWaleUserKiId,
+        userDetails: user,
+        postId,
+        message: "your post was liked",
+      };
+
+      const postOwnerSocketId = getReceiverSocketId(postOwnerId);
+      io.to(postOwnerSocketId).emit("notification", notification);
+    }
 
     return res.status(201).json({ message: "Post liked", success: true });
   } catch (error) {
@@ -135,7 +154,23 @@ export const dislikePost = async (req, res) => {
     await post.save();
 
     // implement socket io for real time notification
+    const user = await User.findById(likeKarneWaleUserKiId).select(
+      "username profilePicture"
+    );
+    const postOwnerId = await post.author.toString();
+    if (postOwnerId !== likeKarneWaleUserKiId) {
+      // emit notification event
+      const notification = {
+        type: "dislike",
+        userId: likeKarneWaleUserKiId,
+        userDetails: user,
+        postId,
+        message: "your post was disliked",
+      };
 
+      const postOwnerSocketId = getReceiverSocketId(postOwnerId);
+      io.to(postOwnerSocketId).emit("notification", notification);
+    }
     return res.status(201).json({ message: "Post disliked", success: true });
   } catch (error) {
     console.log("Error in dislikePost", error);
