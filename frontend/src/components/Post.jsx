@@ -133,12 +133,14 @@ const Post = ({ post }) => {
             aria-describedby={undefined}
             className="flex flex-col items-center text-sm text-center"
           >
-            <Button
-              variant="ghost"
-              className="cursor-pointer w-fit text-[#ED4956] font-bold"
-            >
-              Unfollow
-            </Button>
+            {post.author._id !== user._id && (
+              <Button
+                variant="ghost"
+                className="cursor-pointer w-fit text-[#ED4956] font-bold"
+              >
+                Unfollow
+              </Button>
+            )}
 
             <Button variant="ghost" className="cursor-pointer w-fit">
               Add to favorites

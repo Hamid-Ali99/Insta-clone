@@ -5,6 +5,7 @@ const postSlice = createSlice({
   initialState: {
     posts: [],
     selectedPost: null,
+    // isFollowing: false,
   },
   reducers: {
     setPosts: (state, action) => {
@@ -13,9 +14,16 @@ const postSlice = createSlice({
     setSelectedPost: (state, action) => {
       state.selectedPost = action.payload;
     },
+    // setIsFollowing: (state, action) => {
+    //   state.isFollowing = action.payload;
+    // },
   },
 });
 
-export const { setPosts, setSelectedPost } = postSlice.actions;
+export const {
+  setPosts,
+  setSelectedPost,
+  // setIsFollowing
+} = postSlice.actions;
 
 export default postSlice.reducer;

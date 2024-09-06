@@ -17,7 +17,7 @@ const useGetUserProfile = (userId) => {
           //   (a, b) => b.createdAt - a.createdAt
           // );
           dispatch(setUserProfile(res.data.user));
-          console.log(res.data.user);
+          // console.log(res.data.user);
         }
       } catch (error) {
         console.log(error);

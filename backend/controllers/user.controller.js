@@ -208,11 +208,11 @@ export const getSuggestedUsers = async (req, res) => {
 
 export const followOrUnfollow = async (req, res) => {
   try {
-    const followkernawala = req.id;
+    const followkernawala = req.userId;
     const jiskofollowkrongoga = req.params.id;
 
     if (followkernawala === jiskofollowkrongoga) {
-      return res.status(401).json({
+      return res.status(400).json({
         message: "You cannot follow or unfollow yourself",
         success: false,
       });
@@ -222,8 +222,8 @@ export const followOrUnfollow = async (req, res) => {
     const targetUser = await User.findById(jiskofollowkrongoga);
 
     if (!user || !targetUser) {
-      return res.status(401).json({
-        message: "user not found",
+      return res.status(404).json({
+        message: "User not found",
         success: false,
       });
     }
@@ -232,39 +232,37 @@ export const followOrUnfollow = async (req, res) => {
 
     if (isFollowing) {
       // unfollow logic
-      await Promise.all([
-        User.updateOne(
-          { _id: followkernawala },
-          { $pull: { following: jiskofollowkrongoga } }
-        ),
-        User.updateOne(
-          { _id: jiskofollowkrongoga },
-          { $push: { followers: followkernawala } }
-        ),
-      ]);
-      res.status(201).json({
+      await User.findByIdAndUpdate(followkernawala, {
+        $pull: { following: jiskofollowkrongoga },
+      });
+      await User.findByIdAndUpdate(jiskofollowkrongoga, {
+        $pull: { followers: followkernawala },
+      });
+      res.status(200).json({
         message: "Unfollowed successfully",
         success: true,
+        isFollowing: false,
       });
     } else {
       // follow logic
-      await Promise.all([
-        User.updateOne(
-          { _id: followkernawala },
-          { $push: { following: jiskofollowkrongoga } }
-        ),
-
-        User.updateOne(
-          { _id: jiskofollowkrongoga },
-          { $push: { followers: followkernawala } }
-        ),
-      ]);
-      res.status(201).json({
+      await User.findByIdAndUpdate(followkernawala, {
+        $addToSet: { following: jiskofollowkrongoga },
+      });
+      await User.findByIdAndUpdate(jiskofollowkrongoga, {
+        $addToSet: { followers: followkernawala },
+      });
+      res.status(200).json({
         message: "Followed successfully",
         success: true,
+        isFollowing: true,
       });
     }
   } catch (error) {
-    console.log("errror in followOrUnfollow", error);
+    console.log("Error in followOrUnfollow", error);
+    res.status(500).json({
+      message: "An error occurred",
+      success: false,
+      error: error.message,
+    });
   }
 };

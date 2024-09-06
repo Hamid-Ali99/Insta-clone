@@ -1,20 +1,31 @@
 import { Link, useParams } from "react-router-dom";
 import useGetUserProfile from "../hooks/useGetUserProfile";
-import { useSelector } from "react-redux";
-import { useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { useEffect, useState } from "react";
 import { Avatar, AvatarFallback, AvatarImage } from "./ui/avatar";
 import { Badge } from "./ui/badge";
 import { AtSign, Heart, MessageCircle } from "lucide-react";
 import { Button } from "./ui/button";
+import { followOrUnfollowUser } from "@/redux/userApi";
 
 const Profile = () => {
+  const dispatch = useDispatch();
   const params = useParams();
   const userId = params.id;
   useGetUserProfile(userId);
   const { userProfile, user } = useSelector((state) => state.auth);
-  console.log(userProfile);
+  // console.log(userProfile);
 
-  const isFollowing = false;
+  const [isFollowing, setIsFollowing] = useState(false);
+
+  useEffect(() => {
+    if (userProfile && user) {
+      const following = userProfile.followers.includes(user._id);
+      setIsFollowing(following);
+      console.log("Is following:", following);
+    }
+  }, [userProfile, user]);
+
   const isLoggedInUserProfile = user?._id === userProfile?._id;
 
   const [activeTab, setActiveTab] = useState("posts");
@@ -25,6 +36,14 @@ const Profile = () => {
 
   const displayedPost =
     activeTab === "posts" ? userProfile?.posts : userProfile?.bookmarks;
+
+  const followOrUnfollowHandler = async () => {
+    if (userProfile) {
+      const result = await dispatch(followOrUnfollowUser(userProfile._id));
+      console.log("Follow/Unfollow result:", result);
+      setIsFollowing(!isFollowing);
+    }
+  };
 
   return (
     <div className="flex max-w-5xl justify-center mx-auto pl-10">
@@ -68,7 +87,11 @@ const Profile = () => {
                   </>
                 ) : isFollowing ? (
                   <>
-                    <Button variant="secondary" className="h-8">
+                    <Button
+                      onClick={followOrUnfollowHandler}
+                      variant="secondary"
+                      className="h-8"
+                    >
                       Unfollow
                     </Button>
                     <Button variant="secondary" className="h-8">
@@ -76,7 +99,10 @@ const Profile = () => {
                     </Button>
                   </>
                 ) : (
-                  <Button className="bg-[#0095F6] hover:bg-[#3192d2] h-8">
+                  <Button
+                    onClick={followOrUnfollowHandler}
+                    className="bg-[#0095F6] hover:bg-[#3192d2] h-8"
+                  >
                     Follow
                   </Button>
                 )}
