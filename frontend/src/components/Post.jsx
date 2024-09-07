@@ -20,6 +20,7 @@ const Post = ({ post }) => {
   const [openCommentModel, setOpenCommentModel] = useState(false);
   const [text, setText] = useState("");
   const { user } = useSelector((state) => state.auth);
+  // console.log(post);
   const { posts } = useSelector((state) => state.post);
   const [liked, setLiked] = useState(post.likes.includes(user._id) || false);
   const [postLike, setPostLike] = useState(post.likes.length);
@@ -107,6 +108,19 @@ const Post = ({ post }) => {
     }
   };
 
+  const bookmarkHandler = async () => {
+    try {
+      const res = await axios.get(`${SERVER_API}/post/${post._id}/bookmark`, {
+        withCredentials: true,
+      });
+      if (res.data.success) {
+        toast.success(res.data.message);
+      }
+    } catch (error) {
+      console.log("Error in bookmarkHandler", error);
+    }
+  };
+
   return (
     <div className="my-8 w-full max-w-sm mx-auto">
       <div className="flex items-center justify-between">
@@ -190,7 +204,11 @@ const Post = ({ post }) => {
           />
           <Send className="cursor-pointer hover:text-gray-600" />
         </div>
-        <Bookmark className="cursor-pointer hover:text-gray-600" />
+
+        <Bookmark
+          onClick={bookmarkHandler}
+          className="cursor-pointer hover:text-gray-600"
+        />
       </div>
 
       <span className="font-medium block mb-2">

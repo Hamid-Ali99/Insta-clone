@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useDispatch } from "react-redux";
+import { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import axios from "axios";
@@ -10,6 +10,7 @@ import { SERVER_API } from "@/lib/utils";
 import { setAuthUser } from "@/redux/authSlice";
 
 const Login = () => {
+  const { user } = useSelector((state) => state.auth);
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [input, setInput] = useState({
@@ -50,6 +51,12 @@ const Login = () => {
       setLoading(false);
     }
   };
+
+  useEffect(() => {
+    if (user) {
+      navigate("/");
+    }
+  }, [navigate, user]);
 
   return (
     <div className="flex items-center w-screen h-screen justify-center">

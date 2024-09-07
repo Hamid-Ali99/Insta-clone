@@ -291,7 +291,7 @@ export const bookmarkPost = async (req, res) => {
       await user.save();
       return res.status(201).json({
         type: "unsaved",
-        message: "Post bookmared",
+        message: "Post saved",
         success: true,
       });
     } else {
@@ -300,7 +300,7 @@ export const bookmarkPost = async (req, res) => {
       await user.save();
       return res.status(201).json({
         type: "saved",
-        message: "Post bookmared",
+        message: "Post unsaved",
         success: true,
       });
     }
